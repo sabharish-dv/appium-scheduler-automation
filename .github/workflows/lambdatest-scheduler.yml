@@ -2,12 +2,12 @@ name: LambdaTest Scheduler Test
 
 on:
   schedule:
-    # Run at 10:40 PM, 10:45 PM, and 10:50 PM IST daily
-    - cron: '10 17 * * *'
-    # Run at 10:45 PM IST daily
-    - cron: '15 17 * * *'
-    # Run at 10:50 PM IST daily
-    - cron: '20 17 * * *'
+    # Run at 10:50 PM, 10:55 PM, and 11:00 PM IST daily
+    - cron: '30 17 * * *'
+    # Run at 10:55 PM IST daily
+    - cron: '25 17 * * *'
+    # Run at 11:00 PM IST daily
+    - cron: '30 17 * * *'
   workflow_dispatch:
     # Allow manual triggering
   push:
