@@ -1,0 +1,19 @@
+name: Scheduled Execution Test
+
+on:
+  schedule:
+    # Runs every 2 minutes
+    - cron: "*/2 * * * *"
+  workflow_dispatch:
+
+jobs:
+  scheduled-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Print current time
+        run: |
+          echo "Current time: $(date)"
+          echo "This workflow runs every 2 minutes via CRON schedule"
