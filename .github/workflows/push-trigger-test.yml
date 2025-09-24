@@ -1,0 +1,19 @@
+name: Push Trigger Test
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Print current time
+      run: |
+        echo "Current time: $(date)"
+        echo "This workflow runs on every push to main branch"
+        echo "If you see this, push triggers are working!"
