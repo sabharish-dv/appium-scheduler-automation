@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Appium Test Suite" parallel="tests" thread-count="2">
+    <test name="Android Tests">
+        <classes>
+            <class name="com.example.appium.tests.AndroidTest"/>
+        </classes>
+    </test>
+    
+    <test name="iOS Tests">
+        <classes>
+            <class name="com.example.appium.tests.iOSTest"/>
+        </classes>
+    </test>
+    
+    <test name="Scheduler Tests">
+        <classes>
+            <class name="com.example.appium.tests.SchedulerTest"/>
+        </classes>
+    </test>
+</suite>
