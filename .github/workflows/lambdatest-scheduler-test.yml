@@ -1,0 +1,94 @@
+name: LambdaTest Scheduler Test - Every 2 Minutes
+
+on:
+  schedule:
+    # Run every 2 minutes for testing
+    - cron: '*/2 * * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'src/test/java/com/example/appium/tests/SchedulerTest.java'
+      - 'src/main/java/com/example/appium/**'
+      - 'src/main/resources/appium.properties'
+      - 'src/main/resources/lambdatest.properties'
+
+jobs:
+  scheduler-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+        
+    - name: Run SchedulerTest on LambdaTest
+      env:
+        LT_USERNAME: ${{ secrets.LT_USERNAME }}
+        LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
+        LT_GRID_URL: ${{ secrets.LT_GRID_URL }}
+      run: |
+        echo "Starting SchedulerTest on LambdaTest..."
+        echo "LambdaTest Username: $LT_USERNAME"
+        echo "LambdaTest Grid URL: $LT_GRID_URL"
+        mvn clean test -Dtest=SchedulerTest -DsuiteXmlFile=testng.xml \
+          -Dlambdatest=true \
+          -Dlt.username=$LT_USERNAME \
+          -Dlt.accesskey=$LT_ACCESS_KEY \
+          -Dlt.grid.url=$LT_GRID_URL
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          target/surefire-reports/
+          screenshots/
+          test-output/
+          
+    - name: Upload screenshots
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: screenshots
+        path: screenshots/
+        
+    - name: Comment on PR (if applicable)
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          // Read test results if available
+          let testResults = 'Test execution completed.';
+          try {
+            const reportPath = 'target/surefire-reports/TEST-com.example.appium.tests.SchedulerTest.xml';
+            if (fs.existsSync(reportPath)) {
+              testResults = '✅ SchedulerTest executed successfully on LambdaTest!';
+            }
+          } catch (error) {
+            testResults = '⚠️ Test execution completed with some issues.';
+          }
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 🤖 LambdaTest Scheduler Test Results\n\n${testResults}\n\n**Triggered by:** ${context.actor}\n**Workflow:** ${context.workflow}\n**Run ID:** ${context.runId}\n\n**LambdaTest Dashboard:** [View Results](https://automation.lambdatest.com/logs/)`
+          });
