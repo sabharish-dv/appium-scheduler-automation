@@ -1,110 +1,132 @@
-# Appium Automation Project
+# Appium Scheduler Automation
 
-This Maven project is configured for mobile app automation testing using Appium.
+This project demonstrates automated testing with Appium, featuring a SchedulerTest that runs on LambdaTest via GitHub Actions.
 
-## Prerequisites
+## 🚀 Features
 
-1. **Java 17** - Make sure Java 17 is installed
-2. **Maven** - Build tool for the project
-3. **Appium Server** - Install Appium server globally or use Appium Desktop
-4. **Android SDK** - For Android testing
-5. **Xcode** - For iOS testing (macOS only)
+- **SchedulerTest**: Automated test that launches an app, waits 30 seconds, copies screen text, and quits
+- **LambdaTest Integration**: Cloud-based testing on real devices
+- **GitHub Actions**: Automated scheduling and execution
+- **Cross-platform**: Supports both Android and iOS testing
 
-## Setup Instructions
+## �� Prerequisites
 
-### 1. Install Appium Server
+- Java 17+
+- Maven 3.6+
+- LambdaTest account with credentials
+- GitHub repository with Actions enabled
+
+## 🛠️ Setup Instructions
+
+### 1. LambdaTest Setup
+
+✅ **Already configured with your credentials:**
+- **Username**: ranjisabharish
+- **App URL**: lt://APP1016032111758469753275919
+- **Device**: Galaxy.* (Android 14)
+- **Platform**: Android
+
+### 2. GitHub Secrets Configuration
+
+Add the following secrets to your GitHub repository:
+
+1. Go to your repository → Settings → Secrets and variables → Actions
+2. Add these repository secrets:
+
+```
+LT_USERNAME=ranjisabharish
+LT_ACCESS_KEY=LT_5choxWTgS6Y4sSzwze82apqgHFFJiJr1d8XFxFznFBrLLt4
+LT_GRID_URL=mobile-hub.lambdatest.com/wd/hub
+```
+
+### 3. App Configuration
+
+✅ **Already configured:**
+- **App Package**: com.delhiveryConsigneeApp
+- **App Activity**: com.delhiveryConsigneeApp.MainActivity
+- **App URL**: lt://APP1016032111758469753275919
+
+## 🕐 Scheduling
+
+The GitHub Actions workflow is configured to run:
+
+- **Daily at 9:45 PM UTC** (customizable in `.github/workflows/lambdatest-scheduler.yml`)
+- **On push** to main/master branch
+- **Manually** via GitHub Actions tab
+
+### Customizing Schedule
+
+Edit the cron expression in `.github/workflows/lambdatest-scheduler.yml`:
+
+```yaml
+schedule:
+  - cron: '45 21 * * *'  # 9:45 PM UTC daily
+```
+
+## 🧪 Running Tests
+
+### Local Execution
+
 ```bash
-npm install -g appium
-npm install -g appium-doctor
+# Run SchedulerTest locally
+mvn test -Dtest=SchedulerTest
+
+# Run on LambdaTest
+mvn test -Dtest=SchedulerTest -Dlambdatest=true \
+  -Dlt.username=ranjisabharish \
+  -Dlt.accesskey=LT_5choxWTgS6Y4sSzwze82apqgHFFJiJr1d8XFxFznFBrLLt4 \
+  -Dlt.grid.url=mobile-hub.lambdatest.com/wd/hub
 ```
 
-### 2. Install Appium Drivers
-```bash
-appium driver install uiautomator2  # For Android
-appium driver install xcuitest      # For iOS
-```
+### GitHub Actions
 
-### 3. Verify Installation
-```bash
-appium-doctor --android  # Check Android setup
-appium-doctor --ios      # Check iOS setup (macOS only)
-```
+1. **Automatic**: Runs on schedule or push
+2. **Manual**: Go to Actions tab → LambdaTest Scheduler Test → Run workflow
 
-### 4. Configure Device Settings
-Update `src/main/resources/appium.properties` with your device details:
-- Device name
-- Platform version
-- UDID
-- App package/activity
+## 📊 Test Results
 
-## Project Structure
+- **Screenshots**: Saved in `screenshots/` directory
+- **Test Reports**: Available in GitHub Actions artifacts
+- **LambdaTest Dashboard**: View detailed results at [automation.lambdatest.com](https://automation.lambdatest.com/logs/)
 
-```
-src/
-├── main/
-│   ├── java/com/example/appium/
-│   │   ├── config/          # Appium configuration
-│   │   ├── pages/           # Page Object Model classes
-│   │   ├── tests/           # Test classes
-│   │   └── utils/           # Utility classes
-│   └── resources/
-│       └── appium.properties # Configuration file
-└── test/
-    └── java/com/example/appium/tests/ # Test classes
-```
+## 🔧 Configuration Files
 
-## Running Tests
+- `src/main/resources/appium.properties` - Local Appium configuration
+- `src/main/resources/lambdatest.properties` - LambdaTest configuration
+- `.github/workflows/lambdatest-scheduler.yml` - GitHub Actions workflow
+- `testng.xml` - TestNG suite configuration
 
-### Run all tests
-```bash
-mvn test
-```
+## 📱 Supported Platforms
 
-### Run specific test suite
-```bash
-mvn test -DsuiteXmlFile=testng.xml
-```
+- **Android**: API 14+ (Galaxy devices)
+- **iOS**: iOS 14+ (iPhone 12, iPhone 13, etc.)
 
-### Generate Allure report
-```bash
-mvn allure:serve
-```
+## 🎯 Current Configuration
 
-## Dependencies Included
+- **App**: Delhivery Consignee App
+- **Device**: Galaxy.* (Android 14)
+- **Schedule**: Daily at 9:45 PM UTC
+- **Build**: Appium Scheduler Test Build
+- **Session**: SchedulerTest Session
 
-- **Appium Java Client** - Core Appium functionality
-- **Selenium WebDriver** - WebDriver implementation
-- **TestNG** - Test framework
-- **JUnit 5** - Additional testing support
-- **Allure** - Test reporting
-- **ExtentReports** - Detailed reporting
-- **Jackson** - JSON processing
-- **Apache Commons** - Utility functions
-- **WebDriverManager** - Automatic driver management
-- **Apache POI** - Excel file handling
-- **Logback** - Logging
+## 🤝 Contributing
 
-## Configuration
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test locally and on LambdaTest
+5. Submit a pull request
 
-The project uses `appium.properties` for configuration. Key settings include:
-- Appium server URL
-- Device capabilities
-- App details
-- Timeouts
-- Screenshot settings
+## 📄 License
 
-## Best Practices
+This project is licensed under the MIT License.
 
-1. Use Page Object Model for better maintainability
-2. Implement proper wait strategies
-3. Take screenshots on test failures
-4. Use meaningful test names and descriptions
-5. Implement proper cleanup in @AfterMethod
-6. Use Allure annotations for better reporting
+## 🆘 Support
 
-## Troubleshooting
+- **Issues**: Create an issue in this repository
+- **LambdaTest**: [Documentation](https://www.lambdatest.com/support/docs/)
+- **Appium**: [Documentation](https://appium.io/docs/en/about-appium/intro/)
 
-1. Ensure Appium server is running before executing tests
-2. Check device connectivity and capabilities
-3. Verify app installation on device/emulator
-4. Check logs for detailed error information
+---
+
+**Happy Testing! 🎉**
