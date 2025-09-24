@@ -51,7 +51,7 @@ jobs:
           -Dlt.grid.url=$LT_GRID_URL
         
     - name: Upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: test-results
@@ -61,7 +61,7 @@ jobs:
           test-output/
           
     - name: Upload screenshots
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: screenshots
