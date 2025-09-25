@@ -87,7 +87,7 @@ jobs:
           username: ${{ secrets.EMAIL_USER }}
           password: ${{ secrets.EMAIL_PASS }}
           subject: "LambdaTest Appium Results - Run #${{ github.run_number }}"
-          to: "r.anjisabharish@delhivery.com"
+          to: "r.anjisabharish@delhivery.com, rohit.sharma4@delhivery.com"
           from: "apurba.podder@delhivery.com"
           body: |
             Hi Team,
