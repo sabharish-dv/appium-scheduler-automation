@@ -1,0 +1,112 @@
+name: Daily Mobile Automation on LambdaTest
+
+on:
+  schedule:
+    - cron: "30 16 * * *"   # Runs daily at 10 PM IST (16:30 UTC)
+  workflow_dispatch:        # Allow manual trigger from Actions tab
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # Step 3: Cache Maven dependencies
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Step 4: Install dependencies
+      - name: Install dependencies
+        run: mvn install -DskipTests=true
+
+      # Step 5: Run Appium Tests on LambdaTest
+      - name: Run Appium Tests
+        env:
+          LT_USERNAME: ${{ secrets.LT_USERNAME }}
+          LT_ACCESS_KEY: ${{ secrets.LT_ACCESS_KEY }}
+          LT_GRID_URL: mobile-hub.lambdatest.com/wd/hub
+        run: mvn test -DsuiteXmlFile=testng.xml -Dlambdatest=true
+
+      # Step 6: Extract summary from TestNG results
+      - name: Extract Test Summary
+        if: always()
+        run: |
+          mkdir -p reports
+          # Check both possible locations for TestNG results
+          if [ -f "test-output/testng-results.xml" ]; then
+            RESULTS_FILE="test-output/testng-results.xml"
+          elif [ -f "target/surefire-reports/testng-results.xml" ]; then
+            RESULTS_FILE="target/surefire-reports/testng-results.xml"
+          else
+            echo "No TestNG results file found"
+            exit 1
+          fi
+          
+          PASSED=$(grep -oP 'passed="\K[0-9]+' $RESULTS_FILE || echo 0)
+          FAILED=$(grep -oP 'failed="\K[0-9]+' $RESULTS_FILE || echo 0)
+          SKIPPED=$(grep -oP 'skipped="\K[0-9]+' $RESULTS_FILE || echo 0)
+          echo "PASSED=$PASSED" >> $GITHUB_ENV
+          echo "FAILED=$FAILED" >> $GITHUB_ENV
+          echo "SKIPPED=$SKIPPED" >> $GITHUB_ENV
+          echo "Test Summary: Passed=$PASSED, Failed=$FAILED, Skipped=$SKIPPED" > reports/summary.txt
+
+      # Step 7: Archive Reports as GitHub Artifact
+      - name: Archive Reports
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: reports
+          path: |
+            target/surefire-reports
+            test-output
+            reports/summary.txt
+            screenshots
+
+      # Step 8: Send Email with Test Summary + Attach Reports
+      - name: Send email with results
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USER }}
+          password: ${{ secrets.EMAIL_PASS }}
+          subject: "LambdaTest Appium Results - Run #${{ github.run_number }}"
+          to: "qa-team@example.com, manager@example.com"
+          from: "CI Bot <ci@example.com>"
+          body: |
+            Hi Team,
+
+            ✅ Daily Appium Automation Suite has finished.
+
+            📊 Test Summary:
+            - Passed: ${{ env.PASSED }}
+            - Failed: ${{ env.FAILED }}
+            - Skipped: ${{ env.SKIPPED }}
+
+            🔗 Repository: ${{ github.repository }}
+            🔗 Workflow: ${{ github.workflow }}
+            🔗 Run Number: ${{ github.run_number }}
+
+            Full reports are attached and also available in GitHub Actions artifacts.
+
+            Regards,
+            Local Mobile Automation Team
+          attachments: |
+            reports/summary.txt
+            test-output/testng-results.xml
